@@ -1,0 +1,144 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+{% load static %}
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>资源管理系统-首页</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+</head>
+<script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/slide.js' %}"></script>
+<body>
+{% csrf_token %}
+<div class="header_con">
+    <div class="header">
+        <div class="welcome fl">欢迎来到资源管理系统!</div>
+        <div class="fr">
+            {% if user.is_authenticated %}
+                <div class="login_btn fl">
+                    欢迎您：<em>{{ user.username }}</em>
+                    <span>|</span>
+                    <a href="{% url 'user:logout' %}">退出</a>
+                </div>
+            {% else %}
+                <div class="login_btn fl">
+                    <a href="{% url 'user:login' %}">登录</a>
+                    <span>|</span>
+                    <a href="{% url 'user:register' %}">注册</a>
+                </div>
+            {% endif %}
+            <div class="user_link fl">
+                <span>|</span>
+                <a href="{% url 'user:center' %}">用户中心</a>
+                <span>|</span>
+                <a href="{% url 'cart:cart' %}">我的购物车</a>
+                <span>|</span>
+                <a href="{% url 'user:order' 1 %}">我的订单</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="search_bar clearfix">
+    <a href="{% url 'resource:index' %}" class="logo fl"><img src="{% static 'image/logo01.png' %}"></a>
+    <div class="search_con fl">
+        <form method="get" action="/search">
+            <input type="text" class="input_text fl" name="q" placeholder="搜索商品">
+            <input type="submit" class="input_btn fr" name="" value="搜索">
+        </form>
+    </div>
+    <div class="guest_cart fr">
+        <a href="{% url 'cart:cart' %}" class="cart_name fl">我的购物车</a>
+        <div class="goods_count fl" id="show_count">{{ cart_count }}</div>
+    </div>
+</div>
+<div class="breadcrumb">
+    <a href="#">全部分类</a>
+    <span>></span>
+    <a href="#">{{ resource.resource_type.type_name }}</a>
+    <span>></span>
+    <a href="#">商品详情</a>
+</div>
+
+<div class="goods_detail_con clearfix">
+    <div class="goods_detail_pic fl"><img src="{% static 'image/resource.png' %}"></div>
+    <div class="goods_detail_list fr">
+        <h3>{{ resource.rname }}</h3>
+        <p>{{ resource.rdescribe }}</p>
+        <div class="prize_bar">
+            <span class="show_pirze">¥<em>{{ resource.rprice }}</em></span>
+            <span class="show_unit">单  位：件</span>
+        </div>
+        <div class="goods_num clearfix">
+            百度云盘下载地址:&nbsp;&nbsp;&nbsp; {{ cloud_address }}
+        </div>
+        <div class="total">总价：<em>{{ resource.rprice }}</em></div>
+        <div class="operate_btn">
+            <form action="{% url 'order:order_place' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="resource_id" value="{{ resource.id }}"/>
+                <input class="buy_btn" type="submit" value="立即购买"/>
+                <a href="javascript:void(0)" resource_id="{{ resource.id }}" class="add_cart" id="add_cart">加入购物车</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main_wrap clearfix">
+    <div class="l_wrap fl clearfix">
+        <div class="new_goods">
+            <h3>新品推荐</h3>
+            <ul>
+                {% for sku in new_skus %}
+                    <li>
+                        <a href="{% url 'goods:detail' sku.id %}"><img src="{{ sku.image.url }}"></a>
+                        <h4><a href="{% url 'goods:detail' sku.id %}">{{ sku.name }}</a></h4>
+                        <div class="prize">￥{{ sku.price }}</div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="r_wrap fr clearfix">
+        <ul class="detail_tab clearfix">
+            <li class="active">商品介绍</li>
+        </ul>
+
+        <div class="tab_content">
+            <dl>
+                <dt>商品详情：</dt>
+                <dd>{{ resource.rdetail|safe }}</dd>
+            </dl>
+        </div>
+    </div>
+</div>
+<div class="footer">
+    <div class="foot_link">
+        <a href="#">关于我们</a>
+        <span>|</span>
+        <a href="#">联系我们</a>
+        <span>|</span>
+        <a href="#">招聘人才</a>
+        <span>|</span>
+        <a href="#">友情链接</a>
+    </div>
+    <p>CopyRight © 2020 豪威尔科技有限公司 All Rights Reserved</p>
+    <p>电话：(028) 66333314 蜀ICP备15008801号-2</p>
+</div>
+</body>
+<script type="text/javascript">
+    $("#add_cart").click(function () {
+        csrf = $("input[name='csrfmiddlewaretoken']").val();
+        resource_id = $(this).attr("resource_id");
+        params = {'resource_id': resource_id, 'csrfmiddlewaretoken': csrf};
+        $.post('{% url 'cart:cartadd' %}', params, function (data) {
+            if (data.res == 5)
+                num = data.cart_len;
+            $('#show_count').empty().text(num);
+        });
+    });
+</script>
+</html>

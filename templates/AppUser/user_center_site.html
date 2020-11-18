@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+{% load static %}
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/slide.js' %}"></script>
+</head>
+<body>
+{% csrf_token %}
+<div class="header_con">
+    <div class="header">
+        <div class="welcome fl">欢迎来到资源管理系统!</div>
+        <div class="fr">
+            {% if user.is_authenticated %}
+                <div class="login_btn fl">
+                    <em>{{ user.username }}</em>
+                    <span>|</span>
+                    <a href="{% url 'user:logout' %}">退出</a>
+                </div>
+            {% else %}
+                <div class="login_btn fl">
+                    <a href="{% url 'user:login' %}">登录</a>
+                    <span>|</span>
+                    <a href="{% url 'user:register' %}">注册</a>
+                </div>
+            {% endif %}
+            <div class="user_link fl">
+                <span>|</span>
+                <a href="{% url 'user:center' %}">用户中心</a>
+                <span>|</span>
+                <a href="{% url 'cart:cart' %}">我的购物车</a>
+                <span>|</span>
+                <a href="{% url 'user:order' 1 %}">我的订单</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="search_bar clearfix">
+    <a href="{% url 'resource:index' %}" class="logo fl"><img src="{% static 'image/logo01.png' %}"></a>
+    <div class="sub_page_name fl">&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;地址管理
+    </div>
+    <div class="search_bar clearfix">
+        <div class="search_con fr">
+            <form method="get" action="/search">
+                <input type="text" class="input_text fl" placeholder="搜索商品" name="q">
+                <input type="submit" class="input_btn fr" name="" value="搜索">
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main_con clearfix">
+    <div class="left_menu_con clearfix">
+        <h3>用户中心</h3>
+        <ul>
+            <li><a href="{% url 'user:center' %}" {% if page == 'user' %}class="active"{% endif %}>· 个人信息</a></li>
+            <li><a href="{% url 'user:order' 1 %}" {% if page == 'order' %}class="active"{% endif %}>· 全部订单</a></li>
+            <li><a href="{% url 'user:address' %}" {% if page == 'address' %}class="active"{% endif %}>· 收货地址</a></li>
+            <li><a href="{% url 'user:power' %}" {% if page == 'power' %}class="active"{% endif %}>· 会员中心</a></li>
+        </ul>
+    </div>
+    <div class="right_content clearfix">
+        <h3 class="common_title2">收货地址</h3>
+        <div class="site_con">
+            <dl>
+                <dt>当前地址：</dt>
+                {% if address_default %}
+                    <dd><label>（{{ address_default.addReceiver }}
+                        收） {{ address_default.aphone }} {{ address_default.addr }} {{ address_default.zip_code }}</label>
+                    </dd>
+                {% else %}
+                    <dd>无默认地址</dd>
+                {% endif %}
+            </dl>
+        </div>
+        <h3 class="common_title2">编辑地址</h3>
+        <div class="site_con">
+            <form method="post" action="{% url 'user:address' %}">
+                {% csrf_token %}
+                <div class="form_group">
+                    <label>收件人：</label>
+                    <input type="text" id="receiver" name="receiver">
+                </div>
+                <div class="form_group form_group2">
+                    <label>详细地址：</label>
+                    <textarea class="site_area" id="addr" name="addr"></textarea>
+                </div>
+                <div class="form_group">
+                    <label>邮编：</label>
+                    <input type="text" id="zip_code" name="zip_code">
+                </div>
+                <div class="form_group">
+                    <label>手机：</label>
+                    <input type="text" id="phone" name="phone">
+                </div>
+                <input type="hidden" id="addr_id" name="addr_id" value="0">
+                <input type="hidden" id="type" name="type" value="change">
+                <input type="hidden" id="is_default" name="is_default" value="{{ is_default }}"/>
+                <input type="submit" value="提交" class="info_submit">
+            </form>
+        </div>
+        <div class="footer">
+            <div class="foot_link">
+                <a href="#">关于我们</a>
+                <span>|</span>
+                <a href="#">联系我们</a>
+                <span>|</span>
+                <a href="#">招聘人才</a>
+                <span>|</span>
+                <a href="#">友情链接</a>
+            </div>
+            <p>CopyRight © 2020 豪威尔科技有限公司 All Rights Reserved</p>
+            <p>电话：(028) 66333314 蜀ICP备15008801号-2</p>
+        </div>
+    </div>
+</body>

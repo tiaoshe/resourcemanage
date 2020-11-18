@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+{% load static %}
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+    <title>{% block title %}{% endblock title %}</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/reset.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <script type="text/javascript" src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/jquery-ui.min.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/slide.js' %}"></script>
+</head>
+<body>
+<div class="header_con">
+    <div class="header">
+        <div class="welcome fl">欢迎来到资源管理系统!</div>
+        <div class="fr">
+            {% if user.is_authenticated %}
+                <div class="login_btn fl">
+                    欢迎您：<em>{{ user.username }}</em>
+                    <span>|</span>
+                    <a href="{% url 'user:logout' %}">退出</a>
+                </div>
+            {% else %}
+                <div class="login_btn fl">
+                    <a href="{% url 'user:login' %}">登录</a>
+                    <span>|</span>
+                    <a href="{% url 'user:register' %}">注册</a>
+                </div>
+            {% endif %}
+            <div class="user_link fl">
+                <span>|</span>
+                <a href="{% url 'user:center' %}">用户中心</a>
+                <span>|</span>
+                <a href="{% url 'cart:cart' %}">我的购物车</a>
+                <span>|</span>
+                <a href="{% url 'user:order' 1 %}">我的订单</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="search_bar clearfix">
+    <a href="{% url 'resource:index' %}" class="logo fl"><img src="{% static 'image/logo01.png' %}"></a>
+    <div class="sub_page_name fl">&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;&nbsp;购物车
+    </div>
+    <div class="search_bar clearfix">
+        <div class="search_con fr">
+            <form method="get" action="/search">
+                <input type="text" class="input_text fl" placeholder="搜索商品" name="q">
+                <input type="submit" class="input_btn fr" name="" value="搜索">
+            </form>
+        </div>
+    </div>
+</div>
+{% csrf_token %}
+{% if is_logistics %}
+    {% if dft_addr %}
+        <div class="address_show">
+            <div>
+                <h3 class="common_title3">
+                    邮寄地址</h3>{{ dft_addr.addReceiver }} {{ dft_addr.aphone }} {{ dft_addr.addr }} {{ dft_addr.zip_code }}
+            </div>
+            {% if address_count > 1 %}
+                <button class="address_button" onclick="choice_address()">选择地址</button>
+            {% endif %}
+            <button class="address_button"><a href="{% url 'cart:address' %}">新增地址</a></button>
+        </div>
+    {% else %}
+
+        <div class="address_con">
+            <h3 class="common_title3">添加地址</h3>
+            <form id="form1" onsubmit="return false" action="#" method="post">
+                {% csrf_token %}
+                <div class="address_from_group">
+                    <label>收件人: </label>
+                    <input type="text" id="aj_receiver" name="receiver">
+                </div>
+                <div class="address_from_group address_from_group2">
+                    <label>详细地址:</label>
+                    <textarea class="site_area3" id="aj_addr" name="addr"></textarea>
+                </div>
+                <div class="address_from_group">
+                    <label>手机号: </label>
+                    <input type="text" id="aj_phone" name="phone">
+                </div>
+                <div class="address_from_group">
+                    <label>邮编:</label>
+                    <input type="text" id="aj_zip_code" name="zip_code">
+                </div>
+                <div>
+                    <input type="submit" value="提交" onclick="add_address()" name="submitbut"
+                           class="address_info_submit">
+                </div>
+            </form>
+        </div>
+    {% endif %}
+{% endif %}
+<div id="address_info" class="address_show"></div>
+<div class="total_count">全部商品<em>{{ resource_count }}</em>件</div>
+<ul class="cart_list_th clearfix">
+    <li class="col01">资源编号</li>
+    <li class="col02">资源名称</li>
+    <li class="col01">资源价格</li>
+    <li class="col04">操作</li>
+</ul>
+{% for resource in list %}
+    <ul class="cart_list_td clearfix">
+        <li class="col01">{{ forloop.counter }}</li>
+        <li class="col02">{{ resource.rname }}</li>
+        <li class="col01">{{ resource.rprice }}元</li>
+        <li class="col04">
+            <button onclick="remove({{ resource.id }})">删除</button>
+        </li>
+    </ul>
+{% endfor %}
+<form action="{% url 'order:order_place' %}" method="post">
+    <ul class="settlements">
+        {% csrf_token %}
+        <li class="col03">合计(不含运费)：<span>¥</span><em>{{ total }}</em><br>共计<b>{{ resource_count }}</b>件商品</li>
+        <li class="col04"><input type="submit" value="去结算"/></li>
+    </ul>
+</form>
+<div class="footer">
+    <div class="foot_link">
+        <a href="#">关于我们</a>
+        <span>|</span>
+        <a href="#">联系我们</a>
+        <span>|</span>
+        <a href="#">招聘人才</a>
+        <span>|</span>
+        <a href="#">友情链接</a>
+    </div>
+    <p>CopyRight © 2020 豪威尔科技有限公司 All Rights Reserved</p>
+    <p>电话：(028) 66333314 蜀ICP备15008801号-2</p>
+</div>
+</body>
+
+
+<script type="text/javascript">
+    function remove(resource_id) {
+        csrf = $("input[name='csrfmiddlewaretoken']").val();
+        params = {'resource_id': resource_id, 'csrfmiddlewaretoken': csrf};
+        // 发起ajax post请求，访问/cart/remove
+        $.post('{% url 'cart:remove' %}', params, function (data) {
+            if (data.res == 3)
+                window.location.reload()
+        });
+    }
+</script>
+<script type="text/javascript">
+    function add_address() {
+        receiver = $("#aj_receiver").val();
+        phone = $("#aj_phone").val();
+        addr = $("#aj_addr").val();
+        zip_code = $("#aj_zip_code").val();
+        csrf = $("input[name='csrfmiddlewaretoken']").val();
+        $.ajax({
+            type: "post",
+            url: "{% url 'cart:address' %}",
+            data: {
+                "csrfmiddlewaretoken": '{{ csrf_token }}',
+                "receiver": receiver,
+                "phone": phone,
+                "addr": addr,
+                "zip_code": zip_code
+            },
+            success: function (datas) {
+                if (datas.resp == 4)
+                    window.location.reload()
+            },
+        })
+    }
+</script>
+<script type="text/javascript">
+    function choice_address() {
+        $("#address_info").empty();
+        csrf = $("input[name='csrfmiddlewaretoken']").val();
+        params = {'csrfmiddlewaretoken': csrf};
+        $.post('{% url 'user:all_address' %}', params, function (data) {
+            if (data.resp == 1)
+                addresslist = data.address_list;
+            temp = JSON.parse(addresslist);
+            test1 = temp[0].fields.addReceiver
+            $newtable = $("#address_info");
+            for (var i = 0; i < temp.length; i++) {
+                $newtable.append("<tr>\n" +
+                    "    <td>" + temp[i].fields.addReceiver + "</td>\n" +
+                    "    <td>" + temp[i].fields.aphone + "</td>\n" +
+                    "    <td>" + temp[i].fields.addr + "</td>\n" +
+                    "    <td>" + temp[i].fields.zip_code + "</td>\n" +
+                    "    <td><button onclick=\"address_choice(" + temp[i].pk + ")\">选择</button></td>\n" +
+                    "</tr>")
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    function address_choice(address_id) {
+        csrf = $("input[name='csrfmiddlewaretoken']").val();
+        params = {'address_id': address_id, 'csrfmiddlewaretoken': csrf};
+        // 发起ajax post请求，访问/cart/remove
+        $.post('{% url 'cart:addchoice' %}', params, function (data) {
+            if (data.resp == 1)
+                window.location.reload()
+        });
+    }
+</script>
+</html>
