@@ -1,2 +1,0 @@
-{{object.rname}}
-{{object.rdescribe}}
